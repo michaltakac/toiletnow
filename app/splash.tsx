@@ -1,53 +1,61 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ToiletMascot } from '@/components/ToiletMascot';
 import { colors } from '@/constants/colors';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 
-export default function SplashScreen() {
+SplashScreen.preventAutoHideAsync();
+
+export default function AppSplashScreen() {
   const router = useRouter();
-  const fadeAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(0.8);
-  
+  const [fontsLoaded, fontError] = useFonts({
+    // TODO: Add custom rounded font matching the moodboard, e.g., Nunito or Quicksand
+    'AppFont-Bold': require('@/assets/fonts/SpaceMono-Regular.ttf'), // Placeholder
+    'AppFont-Regular': require('@/assets/fonts/SpaceMono-Regular.ttf'), // Placeholder
+  });
+
   useEffect(() => {
-    // Animation sequence
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 800,
-        easing: Easing.elastic(1.2),
-        useNativeDriver: true,
-      }),
-    ]).start();
-    
-    // Navigate to main app after delay
-    const timer = setTimeout(() => {
-      router.replace('/(tabs)');
-    }, 2500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    async function prepare() {
+      try {
+        // Simulate loading time or initial data fetching
+        await new Promise(resolve => setTimeout(resolve, 2500)); 
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Navigate after loading is complete
+        router.replace('/(tabs)');
+      }
+    }
+
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+      prepare();
+    }
+  }, [fontsLoaded, fontError, router]);
+
+  const getLoadingMessage = () => {
+    const messages = [
+      "Don't panic, relief is on the way!",
+      "Locating the nearest porcelain throne...",
+      "Hang tight, finding facilities!",
+      "Hold on, scanning for restrooms!",
+    ];
+    // Simple way to pick one, could be randomized
+    return messages[0]; // Use the first message for now as per PRD example
+  };
+
+  if (!fontsLoaded && !fontError) {
+    return null; // Render nothing until fonts are loaded or error occurs
+  }
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        <ToiletMascot size="large" />
-        <Text style={styles.title}>ToiletNOW</Text>
-        <Text style={styles.subtitle}>When you gotta go, you gotta know!</Text>
-      </Animated.View>
+      <ToiletMascot expression="normal" size="large" />
+      <Text style={styles.title}>ToiletNOW</Text>
+      <Text style={styles.tagline}>{getLoadingMessage()}</Text>
+      <ActivityIndicator size="small" color={colors.white} style={styles.spinner} />
     </View>
   );
 }
@@ -55,24 +63,28 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.primary, // Use primary color from moodboard
     padding: 20,
-  },
-  content: {
-    alignItems: 'center',
   },
   title: {
     fontSize: 48,
-    fontWeight: 'bold',
+    // fontFamily: 'AppFont-Bold', // Uncomment when font is added
+    fontWeight: 'bold', // Fallback
     color: colors.white,
     marginTop: 24,
     marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: colors.secondary,
     textAlign: 'center',
+  },
+  tagline: {
+    fontSize: 18,
+    // fontFamily: 'AppFont-Regular', // Uncomment when font is added
+    color: colors.secondary, // Use secondary/lighter color
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  spinner: {
+    marginTop: 16,
   },
 });

@@ -5,15 +5,16 @@ import {
   StyleSheet, 
   ViewStyle, 
   TextStyle,
-  View
+  View,
+  StyleProp
 } from 'react-native';
 import { colors } from '@/constants/colors';
 
 interface ClayButtonProps {
   title?: string;
   onPress: () => void;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   icon?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'small' | 'medium' | 'large';

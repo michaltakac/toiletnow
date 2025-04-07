@@ -1,81 +1,57 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
-import { colors } from '@/constants/colors';
+import { Image, StyleSheet, ImageProps, StyleProp, ViewStyle } from 'react-native';
 
-interface ToiletMascotProps {
-  size?: 'small' | 'medium' | 'large';
-  style?: any;
-  expression?: 'normal' | 'happy' | 'panic';
-}
-
-export const ToiletMascot: React.FC<ToiletMascotProps> = ({ 
-  size = 'medium',
-  style,
-  expression = 'normal'
-}) => {
-  // Using placeholder images from Unsplash for the mascot
-  // In a real app, you'd use custom illustrations
-  const getMascotImage = () => {
-    switch (expression) {
-      case 'happy':
-        return 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&auto=format&fit=crop';
-      case 'panic':
-        return 'https://images.unsplash.com/photo-1543269664-56d93c1b41a6?q=80&w=300&auto=format&fit=crop';
-      case 'normal':
-      default:
-        return 'https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=300&auto=format&fit=crop';
-    }
-  };
-
-  const getSizeStyle = () => {
-    switch (size) {
-      case 'small':
-        return {
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-        };
-      case 'large':
-        return {
-          width: 160,
-          height: 160,
-          borderRadius: 80,
-        };
-      case 'medium':
-      default:
-        return {
-          width: 100,
-          height: 100,
-          borderRadius: 50,
-        };
-    }
-  };
-
-  return (
-    <View style={[styles.container, getSizeStyle(), style]}>
-      <Image
-        source={{ uri: getMascotImage() }}
-        style={[styles.image, getSizeStyle()]}
-      />
-    </View>
-  );
+// Placeholder URLs for different mascot expressions
+// TODO: Replace with actual exported 3D clay mascot images
+const mascotImages = {
+  normal: 'https://img.freepik.com/premium-photo/toilet-paper-roll-character-with-big-eyes-3d-rendering_983490-27271.jpg?w=740', // Replace with appropriate image URL
+  happy: 'https://img.freepik.com/premium-photo/toilet-paper-roll-character-with-big-eyes-smiling-3d-rendering_983490-27278.jpg?w=740', // Replace with appropriate image URL
+  panic: 'https://img.freepik.com/premium-photo/scared-toilet-paper-roll-character-with-wide-eyes-3d-rendering_983490-27280.jpg?w=740', // Replace with appropriate image URL
+  celebrate: 'https://img.freepik.com/premium-photo/happy-toilet-paper-roll-character-jumping-joy-3d-rendering_983490-27275.jpg?w=740', // Replace with appropriate image URL
+  thinking: 'https://img.freepik.com/premium-photo/toilet-paper-roll-character-with-thoughtful-expression-3d-rendering_983490-27285.jpg?w=740', // Replace with appropriate image URL
+  worried: 'https://img.freepik.com/premium-photo/worried-toilet-paper-roll-character-with-furrowed-brow-3d-rendering_983490-27282.jpg?w=740', // Replace with appropriate image URL
 };
 
+type MascotExpression = keyof typeof mascotImages;
+type MascotSize = 'small' | 'medium' | 'large';
+
+interface ToiletMascotProps extends Omit<ImageProps, 'source' | 'style'> {
+  expression?: MascotExpression;
+  size?: MascotSize;
+  style?: StyleProp<ViewStyle>; // Allow passing ViewStyle for positioning container
+}
+
+const sizeMap: Record<MascotSize, number> = {
+  small: 60,
+  medium: 120,
+  large: 200,
+};
+
+export function ToiletMascot({ 
+  expression = 'normal', 
+  size = 'medium', 
+  style,
+  ...rest 
+}: ToiletMascotProps) {
+  const imageSize = sizeMap[size];
+  const imageUrl = mascotImages[expression] || mascotImages.normal;
+
+  return (
+    <Image
+      source={{ uri: imageUrl }}
+      style={[
+        styles.image, 
+        { width: imageSize, height: imageSize },
+        style // Apply passed styles to the Image directly if needed for specific image styling
+      ]}
+      resizeMode="contain" 
+      {...rest}
+    />
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    borderWidth: 4,
-    borderColor: colors.white,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-  },
   image: {
-    resizeMode: 'cover',
+    // Basic styling, can be overridden by passed style prop if necessary
   },
 });
